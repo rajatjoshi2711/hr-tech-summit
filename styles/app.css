@@ -223,3 +223,15 @@ ul { list-style: none; padding: 0; }
   .shell { padding-left: var(--space-6); padding-right: var(--space-6); }
   .masthead__title { font-size: var(--text-heading-xl); }
 }
+
+.notice__title {
+  font: var(--weight-semibold) var(--text-body-md) / var(--leading-snug) var(--font-body);
+  color: var(--text-heading);
+}
+
+.notice__detail {
+  margin-top: var(--space-2);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-snug);
+  color: var(--text-muted);
+}

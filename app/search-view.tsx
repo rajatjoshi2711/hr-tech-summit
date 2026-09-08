@@ -37,10 +37,34 @@ function TargetIcon() {
 
 type Status = 'idle' | 'loading' | 'error';
 
+type Failure = 'not_configured' | 'not_seeded' | 'search_failed';
+
+const FAILURE_COPY: Record<Failure, { title: string; detail: string }> = {
+  not_configured: {
+    title: 'The contact list is not connected yet.',
+    detail: 'Add the Neon integration on the Vercel project, then run the seed once.',
+  },
+  not_seeded: {
+    title: 'The database is connected but empty.',
+    detail: 'Run npm run seed to load the 251 contacts.',
+  },
+  search_failed: {
+    title: 'Search is down right now.',
+    detail: 'Try again in a moment.',
+  },
+};
+
+class SearchFailed extends Error {
+  constructor(readonly reason: Failure) {
+    super(reason);
+  }
+}
+
 export default function SearchView() {
   const [query, setQuery] = useState('');
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [status, setStatus] = useState<Status>('loading');
+  const [failure, setFailure] = useState<Failure>('search_failed');
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -52,17 +76,23 @@ export default function SearchView() {
       setStatus('loading');
 
       fetch(`/api/contacts?q=${encodeURIComponent(query)}`, { signal: controller.signal })
-        .then((response) => {
-          if (!response.ok) throw new Error('request failed');
-          return response.json();
+        .then(async (response) => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const reason = (data as { error?: Failure }).error;
+            throw new SearchFailed(reason && reason in FAILURE_COPY ? reason : 'search_failed');
+          }
+          return data as { contacts: Contact[] };
         })
-        .then((data: { contacts: Contact[] }) => {
+        .then((data) => {
           setContacts(data.contacts);
           setStatus('idle');
           setHasLoadedOnce(true);
         })
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === 'AbortError') return;
+          setFailure(error instanceof SearchFailed ? error.reason : 'search_failed');
+          setContacts([]);
           setStatus('error');
           setHasLoadedOnce(true);
         });
@@ -111,7 +141,10 @@ export default function SearchView() {
       </p>
 
       {status === 'error' && (
-        <p className="notice">Search is down right now. Try again in a moment.</p>
+        <div className="notice">
+          <p className="notice__title">{FAILURE_COPY[failure].title}</p>
+          <p className="notice__detail">{FAILURE_COPY[failure].detail}</p>
+        </div>
       )}
 
       {status !== 'error' && hasLoadedOnce && contacts.length === 0 && (

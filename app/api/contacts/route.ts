@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchContacts } from '@/lib/db';
+import { searchContacts, SearchError } from '@/lib/db';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,8 @@ export async function GET(request: Request) {
     const contacts = await searchContacts(q);
     return NextResponse.json({ contacts });
   } catch (error) {
-    console.error('contact search failed', error);
-    return NextResponse.json({ error: 'search_failed' }, { status: 500 });
+    const reason = error instanceof SearchError ? error.reason : 'search_failed';
+    console.error(`contact search failed (${reason})`, error);
+    return NextResponse.json({ error: reason }, { status: 500 });
   }
 }
