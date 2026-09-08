@@ -1,0 +1,234 @@
+:root{
+/* ---- Brand core (sampled from the Talent Muscle lockup) ---- */
+--tm-orange-500:#EF7F1B;
+--tm-blue-500:#0C54A0;
+--tm-ink-900:#2B2A29;
+
+/* ---- Orange scale (action, energy, "Talent") ---- */
+--tm-orange-25:#FEF7EF;
+--tm-orange-50:#FDEEDD;
+--tm-orange-100:#FBDCBA;
+--tm-orange-200:#F8C48D;
+--tm-orange-300:#F5AA5F;
+--tm-orange-400:#F29438;
+--tm-orange-600:#D66C0F;
+--tm-orange-700:#AE560B;
+--tm-orange-800:#7F3E08;
+--tm-orange-900:#552905;
+
+/* ---- Blue scale (trust, structure, "Muscle") ---- */
+--tm-blue-25:#F2F7FC;
+--tm-blue-50:#E3EDF8;
+--tm-blue-100:#C2D8EE;
+--tm-blue-200:#93BADF;
+--tm-blue-300:#5D96CD;
+--tm-blue-400:#2A72B6;
+--tm-blue-600:#0A4685;
+--tm-blue-700:#0E4170;
+--tm-blue-800:#093A63;
+--tm-blue-900:#013567;
+
+/* ---- Neural accents (the brain mark's facets) — data, charts, illustration ---- */
+--tm-cyan-500:#008DD2;
+--tm-sky-400:#41ADD7;
+--tm-aqua-300:#78C8D5;
+--tm-mint-300:#8ACCC6;
+--tm-cobalt-600:#125FA9;
+--tm-deep-700:#086192;
+
+/* ---- Cool neutrals (slight blue undertone; never warm grey) ---- */
+--tm-neutral-0:#FFFFFF;
+--tm-neutral-25:#FAFBFC;
+--tm-neutral-50:#F4F6F9;
+--tm-neutral-100:#E8ECF2;
+--tm-neutral-200:#D5DBE4;
+--tm-neutral-300:#B4BDCA;
+--tm-neutral-400:#8A94A4;
+--tm-neutral-500:#67707F;
+--tm-neutral-600:#4B5462;
+--tm-neutral-700:#353D48;
+--tm-neutral-800:#242A33;
+--tm-neutral-900:#2B2A29;
+
+/* ---- Semantic status ---- */
+--tm-success-500:#2E9E5B;
+--tm-success-50:#E6F5EC;
+--tm-warning-500:#E1A008;
+--tm-warning-50:#FCF3DA;
+--tm-danger-500:#C8372D;
+--tm-danger-50:#FBE9E7;
+--tm-info-500:#008DD2;
+--tm-info-50:#E2F3FC;
+
+/* ---- Semantic aliases: text ---- */
+--text-heading:var(--tm-ink-900);
+--text-body:var(--tm-neutral-700);
+--text-muted:var(--tm-neutral-500);
+--text-subtle:var(--tm-neutral-400);
+--text-brand:var(--tm-blue-500);
+--text-accent:var(--tm-orange-600);
+--text-on-brand:#FFFFFF;
+--text-on-accent:#FFFFFF;
+--text-link:var(--tm-blue-500);
+--text-link-hover:var(--tm-blue-600);
+
+/* ---- Semantic aliases: surfaces ---- */
+--surface-page:var(--tm-neutral-0);
+--surface-subtle:var(--tm-neutral-25);
+--surface-sunken:var(--tm-neutral-50);
+--surface-card:var(--tm-neutral-0);
+--surface-brand:var(--tm-blue-500);
+--surface-brand-deep:var(--tm-blue-900);
+--surface-accent:var(--tm-orange-500);
+--surface-accent-tint:var(--tm-orange-25);
+--surface-brand-tint:var(--tm-blue-25);
+--surface-inverse:var(--tm-neutral-900);
+
+/* ---- Semantic aliases: borders ---- */
+--border-subtle:var(--tm-neutral-100);
+--border-default:var(--tm-neutral-200);
+--border-strong:var(--tm-neutral-300);
+--border-brand:var(--tm-blue-500);
+--border-accent:var(--tm-orange-500);
+--border-focus:var(--tm-orange-500);
+
+/* ---- Gradients (used once per surface, never behind body text) ---- */
+--gradient-brand:linear-gradient(135deg,#013567 0%,#0C54A0 55%,#125FA9 100%); /* @kind color */
+--gradient-accent:linear-gradient(135deg,#EF7F1B 0%,#F29438 100%); /* @kind color */
+--gradient-neural:linear-gradient(120deg,#0C54A0 0%,#008DD2 60%,#8ACCC6 100%); /* @kind color */
+--gradient-page-wash:linear-gradient(180deg,#F2F7FC 0%,#FFFFFF 100%); /* @kind color */
+
+/* ---- Data-viz sequence (brain-mark order) ---- */
+--viz-1:var(--tm-blue-500);
+--viz-2:var(--tm-cyan-500);
+--viz-3:var(--tm-sky-400);
+--viz-4:var(--tm-mint-300);
+--viz-5:var(--tm-orange-500);
+--viz-6:var(--tm-blue-900);
+}
+
+/* Talent Relevance — the product sub-brand leads with navy, orange stays the action colour */
+[data-brand="talent-relevance"]{
+--surface-brand:var(--tm-blue-700);
+--surface-brand-deep:var(--tm-blue-900);
+--text-brand:var(--tm-blue-700);
+--border-brand:var(--tm-blue-700);
+--gradient-brand:linear-gradient(135deg,#013567 0%,#0E4170 100%); /* @kind color */
+}
+:root{
+--font-display:"Sora","Segoe UI",system-ui,sans-serif;
+--font-body:"Manrope","Segoe UI",system-ui,sans-serif;
+--font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
+
+--weight-regular:400; /* @kind font */
+--weight-medium:500; /* @kind font */
+--weight-semibold:600; /* @kind font */
+--weight-bold:700; /* @kind font */
+--weight-extrabold:800; /* @kind font */
+
+/* Fixed scale — do not invent sizes */
+--text-display-xl:72px;
+--text-display-lg:56px;
+--text-display-md:48px;
+--text-heading-xl:36px;
+--text-heading-lg:28px;
+--text-heading-md:24px;
+--text-heading-sm:20px;
+--text-body-lg:18px;
+--text-body-md:16px;
+--text-body-sm:14px;
+--text-caption:12px;
+
+--leading-display:1.05; /* @kind font */
+--leading-heading:1.2; /* @kind font */
+--leading-snug:1.35; /* @kind font */
+--leading-body:1.55; /* @kind font */
+--leading-loose:1.7; /* @kind font */
+
+--tracking-display:-0.02em; /* @kind font */
+--tracking-heading:-0.01em; /* @kind font */
+--tracking-body:0; /* @kind font */
+--tracking-eyebrow:0.12em; /* @kind font */
+
+/* Composite roles */
+--type-eyebrow:var(--weight-bold) var(--text-caption)/1.2 var(--font-body);
+--type-display:var(--weight-extrabold) var(--text-display-md)/var(--leading-display) var(--font-display);
+--type-h1:var(--weight-bold) var(--text-heading-xl)/var(--leading-heading) var(--font-display);
+--type-h2:var(--weight-bold) var(--text-heading-lg)/var(--leading-heading) var(--font-display);
+--type-h3:var(--weight-semibold) var(--text-heading-md)/var(--leading-snug) var(--font-display);
+--type-body:var(--weight-regular) var(--text-body-md)/var(--leading-body) var(--font-body);
+--type-body-strong:var(--weight-semibold) var(--text-body-md)/var(--leading-body) var(--font-body);
+--type-label:var(--weight-semibold) var(--text-body-sm)/1.4 var(--font-body);
+--type-mono:var(--weight-medium) var(--text-body-sm)/1.4 var(--font-mono);
+}
+:root{
+/* 4px base step */
+--space-0:0px;
+--space-1:4px;
+--space-2:8px;
+--space-3:12px;
+--space-4:16px;
+--space-5:20px;
+--space-6:24px;
+--space-8:32px;
+--space-10:40px;
+--space-12:48px;
+--space-16:64px;
+--space-20:80px;
+--space-24:96px;
+--space-32:128px;
+
+/* Layout */
+--layout-gutter:24px;
+--layout-section-y:96px;
+--layout-section-y-sm:56px;
+--width-marketing:1120px;
+--width-product:1280px;
+--width-prose:680px;
+
+/* Control heights */
+--control-h-sm:32px;
+--control-h-md:40px;
+--control-h-lg:48px;
+--control-h-xl:56px;
+}
+:root{
+--radius-xs:4px;
+--radius-sm:6px;
+--radius-md:10px;   /* buttons, inputs, chips */
+--radius-lg:14px;   /* cards */
+--radius-xl:20px;   /* panels */
+--radius-2xl:28px;  /* hero surfaces */
+--radius-pill:999px;
+}
+:root{
+/* Cool blue-tinted shadows — never neutral black wash */
+--shadow-xs:0 1px 2px rgba(12,84,160,.06);
+--shadow-sm:0 1px 3px rgba(12,84,160,.08),0 1px 2px rgba(12,84,160,.06);
+--shadow-md:0 4px 12px rgba(12,84,160,.10),0 1px 3px rgba(12,84,160,.06);
+--shadow-lg:0 12px 28px rgba(12,84,160,.12),0 4px 8px rgba(12,84,160,.06);
+--shadow-xl:0 24px 56px rgba(1,53,103,.16),0 8px 16px rgba(1,53,103,.08);
+--shadow-accent:0 8px 20px rgba(239,127,27,.24);
+--shadow-inset:inset 0 1px 0 rgba(255,255,255,.6);
+--ring-focus:0 0 0 3px rgba(239,127,27,.32);
+--ring-brand:0 0 0 3px rgba(12,84,160,.24);
+--ring-danger:0 0 0 3px rgba(200,55,45,.28);
+}
+:root{
+--duration-instant:80ms; /* @kind other */
+--duration-fast:120ms; /* @kind other */
+--duration-base:180ms; /* @kind other */
+--duration-slow:240ms; /* @kind other */
+--duration-enter:320ms; /* @kind other */
+--ease-out:cubic-bezier(.22,.61,.36,1); /* @kind other */
+--ease-in-out:cubic-bezier(.4,0,.2,1); /* @kind other */
+--ease-standard:cubic-bezier(.2,0,0,1); /* @kind other */
+--transition-control:background-color var(--duration-base) var(--ease-out),color var(--duration-base) var(--ease-out),border-color var(--duration-base) var(--ease-out),box-shadow var(--duration-base) var(--ease-out),transform var(--duration-fast) var(--ease-out); /* @kind other */
+}
+@media (prefers-reduced-motion:reduce){:root{--duration-fast:0ms; /* @kind other */
+--duration-base:0ms; /* @kind other */
+--duration-slow:0ms; /* @kind other */
+--duration-enter:0ms /* @kind other */}}
+@keyframes tm-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes tm-fade{from{opacity:0}to{opacity:1}}
+@keyframes tm-pulse{0%,100%{opacity:1}50%{opacity:.65}}
