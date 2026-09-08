@@ -39,8 +39,12 @@ and the live app picks it up without a redeploy.
 
 ## Notes
 
-- The app is public and unauthenticated. Anyone with the URL can read the full list of 251
-  named individuals with their employer and job title.
+- The app sits behind a 6-digit PIN. The default is `111111`; set `ACCESS_PIN` on the Vercel
+  project to change it. Middleware redirects every unlocked request to `/pin` and answers the
+  contact API with 401, so the list is not readable without the PIN. Unlocking sets an
+  httpOnly cookie holding a hash of the PIN, good for 12 hours.
+- A shared PIN is a soft lock, not real authentication. Anyone who has the PIN can read the
+  full list of 251 named individuals with their employer and job title.
 - Search covers name and company only. Queries are bound parameters, capped at 80 characters,
   and matched with `strpos` / `starts_with` rather than `LIKE`, so a typed `%` or `_` is
   treated as an ordinary character.

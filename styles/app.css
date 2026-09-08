@@ -235,3 +235,142 @@ ul { list-style: none; padding: 0; }
   line-height: var(--leading-snug);
   color: var(--text-muted);
 }
+
+/* ---- PIN gate ---- */
+
+.pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
+.pin__panel {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  animation: tm-rise var(--duration-enter) var(--ease-out) both;
+}
+
+.pin__logo {
+  display: block;
+  width: 168px;
+  height: auto;
+  margin-bottom: var(--space-6);
+}
+
+.pin__title {
+  font: var(--weight-bold) var(--text-heading-lg) / var(--leading-heading) var(--font-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-heading);
+}
+
+.pin__lede {
+  margin-top: var(--space-2);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+}
+
+.pin__form { margin-top: var(--space-6); }
+
+.pin__label {
+  display: block;
+  font: var(--type-label);
+  color: var(--text-heading);
+  margin-bottom: var(--space-2);
+}
+
+.pin__cells {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-2);
+}
+
+/* The real field sits invisibly over the cells so one tap opens the numeric keypad. */
+.pin__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: var(--text-body-lg);
+  letter-spacing: 2em;
+  outline: 0;
+  z-index: 1;
+}
+
+.pin__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control-h-lg);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--weight-bold) var(--text-heading-md) / 1 var(--font-body);
+  color: var(--text-brand);
+  transition: var(--transition-control);
+}
+
+.pin__cell--filled {
+  background: var(--surface-brand-tint);
+  border-color: var(--tm-blue-100);
+}
+
+.pin__input:focus + .pin__cell--active,
+.pin__cells:focus-within .pin__cell--active {
+  border-color: var(--border-focus);
+  box-shadow: var(--ring-focus);
+}
+
+.pin__cells--wrong .pin__cell {
+  border-color: var(--tm-danger-500);
+  background: var(--tm-danger-50);
+}
+
+.pin__message {
+  min-height: 20px;
+  margin-top: var(--space-3);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-snug);
+  color: var(--text-muted);
+}
+
+.pin__cells--wrong ~ .pin__message { color: var(--tm-danger-500); }
+
+.pin__submit {
+  width: 100%;
+  height: var(--control-h-lg);
+  margin-top: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-accent);
+  color: var(--text-on-accent);
+  font: var(--weight-bold) var(--text-body-md) / 1 var(--font-body);
+  cursor: pointer;
+  box-shadow: var(--shadow-accent);
+  transition: var(--transition-control);
+}
+
+.pin__submit:hover:not(:disabled) { background: var(--tm-orange-600); }
+.pin__submit:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+
+.pin__submit:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  box-shadow: none;
+  cursor: not-allowed;
+}
