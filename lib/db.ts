@@ -4,7 +4,7 @@ import type { Contact } from './types';
 const MAX_QUERY_LENGTH = 80;
 const RESULT_LIMIT = 50;
 
-/** Why a search could not run — the UI names the fix for each. */
+/** Why a search could not run - the UI names the fix for each. */
 export type SearchFailure = 'not_configured' | 'not_seeded' | 'search_failed';
 
 export class SearchError extends Error {
@@ -13,17 +13,14 @@ export class SearchError extends Error {
   }
 }
 
-/** Escape the LIKE wildcards so a typed % or _ matches literally. */
-function escapeLike(value: string): string {
-  return value.replace(/([\%_])/g, '\$1');
-}
-
 export async function searchContacts(rawQuery: string): Promise<Contact[]> {
   const url = process.env.DATABASE_URL;
   if (!url) throw new SearchError('not_configured');
 
   const sql = neon(url);
-  const q = escapeLike(rawQuery.trim().slice(0, MAX_QUERY_LENGTH));
+  // strpos and starts_with take the needle literally, so a typed % or _ has no
+  // wildcard meaning and there is no LIKE escape clause to get wrong.
+  const q = rawQuery.trim().slice(0, MAX_QUERY_LENGTH).toLowerCase();
 
   try {
     if (q.length === 0) {
@@ -36,18 +33,15 @@ export async function searchContacts(rawQuery: string): Promise<Contact[]> {
       return rows as Contact[];
     }
 
-    const contains = `%${q}%`;
-    const prefix = `${q}%`;
-
     const rows = await sql`
       select id, name, company, designation, industry, requirement, is_priority
       from contacts
-      where name ilike ${contains} escape '\'
-         or company ilike ${contains} escape '\'
+      where strpos(lower(name), ${q}) > 0
+         or strpos(lower(company), ${q}) > 0
       order by
         is_priority desc,
-        case when company ilike ${prefix} escape '\'
-               or name ilike ${prefix} escape '\' then 0 else 1 end,
+        case when starts_with(lower(company), ${q})
+               or starts_with(lower(name), ${q}) then 0 else 1 end,
         company, name
       limit ${RESULT_LIMIT}
     `;

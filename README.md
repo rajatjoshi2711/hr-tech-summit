@@ -16,7 +16,8 @@ sort to the top of every result set.
 
 ```bash
 npm install
-cp .env.example .env.local   # then paste your Neon connection string in
+npx vercel link              # once, to connect this folder to the Vercel project
+npx vercel env pull .env.local
 npm run seed
 npm run dev
 ```
@@ -41,5 +42,6 @@ and the live app picks it up without a redeploy.
 - The app is public and unauthenticated. Anyone with the URL can read the full list of 251
   named individuals with their employer and job title.
 - Search covers name and company only. Queries are bound parameters, capped at 80 characters,
-  with `%` and `_` escaped so they match literally.
+  and matched with `strpos` / `starts_with` rather than `LIKE`, so a typed `%` or `_` is
+  treated as an ordinary character.
 - Results are capped at 50 per query.

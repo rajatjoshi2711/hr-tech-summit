@@ -5,9 +5,14 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import ExcelJS from 'exceljs';
 import { neon } from '@neondatabase/serverless';
+
+// Vercel writes .env.local; a plain .env is the fallback. dotenv does not
+// overwrite variables that are already set, so the first file wins.
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 const HIGHLIGHT_ARGB = 'FFFFFF00';
 const EXPECTED_ROWS = 251;
@@ -59,7 +64,9 @@ async function readContacts() {
 
 async function main() {
   if (!dryRun && !process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL is not set. Put it in .env.local or export it first.');
+    throw new Error(
+      'DATABASE_URL is not set. Run `npx vercel env pull .env.local`, or export it first.'
+    );
   }
 
   const contacts = await readContacts();
