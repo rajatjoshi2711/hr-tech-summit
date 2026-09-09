@@ -35,6 +35,15 @@ function TargetIcon() {
   );
 }
 
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true">
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
 type Status = 'idle' | 'loading' | 'error';
 
 type Failure = 'not_configured' | 'not_seeded' | 'search_failed';
@@ -66,7 +75,16 @@ export default function SearchView() {
   const [status, setStatus] = useState<Status>('loading');
   const [failure, setFailure] = useState<Failure>('search_failed');
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
+  // With no query the API returns a default slice of the list. That is a browse,
+  // not a result, so it stays folded away until someone asks for it.
+  const isBrowsing = query.trim() === '';
+
+  useEffect(() => {
+    if (isBrowsing) setIsBrowseOpen(false);
+  }, [isBrowsing]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -102,6 +120,9 @@ export default function SearchView() {
   }, [query]);
 
   const isBusy = status === 'loading';
+  const peopleCount = `${contacts.length}${contacts.length === 50 ? '+' : ''} ${
+    contacts.length === 1 ? 'person' : 'people'
+  }`;
 
   return (
     <>
@@ -134,11 +155,27 @@ export default function SearchView() {
         </div>
       </div>
 
-      <p className="count" aria-live="polite">
-        {status === 'error'
-          ? '\u00a0'
-          : `${contacts.length}${contacts.length === 50 ? '+' : ''} ${contacts.length === 1 ? 'person' : 'people'}`}
-      </p>
+      {!isBrowsing && (
+        <p className="count" aria-live="polite">
+          {status === 'error' ? '\u00a0' : peopleCount}
+        </p>
+      )}
+
+      {isBrowsing && status !== 'error' && (
+        <button
+          type="button"
+          className="disclosure"
+          aria-expanded={isBrowseOpen}
+          aria-controls="browse-panel"
+          onClick={() => setIsBrowseOpen((open) => !open)}
+        >
+          <span className={`disclosure__chevron${isBrowseOpen ? ' disclosure__chevron--open' : ''}`}>
+            <ChevronIcon />
+          </span>
+          <span className="disclosure__label">Browse without searching</span>
+          <span className="disclosure__count">{peopleCount}</span>
+        </button>
+      )}
 
       {status === 'error' && (
         <div className="notice">
@@ -147,11 +184,15 @@ export default function SearchView() {
         </div>
       )}
 
-      {status !== 'error' && hasLoadedOnce && contacts.length === 0 && (
+      {status !== 'error' && hasLoadedOnce && contacts.length === 0 && !isBrowsing && (
         <p className="notice">No one matches that. Try a company name.</p>
       )}
 
-      <ul className={`results${isBusy ? ' results--busy' : ''}`}>
+      <ul
+        id="browse-panel"
+        className={`results${isBusy ? ' results--busy' : ''}`}
+        hidden={isBrowsing && !isBrowseOpen}
+      >
         {contacts.map((contact, index) => (
           <li
             key={contact.id}
