@@ -45,7 +45,11 @@ and the live app picks it up without a redeploy.
   httpOnly cookie holding a hash of the PIN, good for 12 hours.
 - A shared PIN is a soft lock, not real authentication. Anyone who has the PIN can read the
   full list of 251 named individuals with their employer and job title.
-- Search covers name and company only. Queries are bound parameters, capped at 80 characters,
-  and matched with `strpos` / `starts_with` rather than `LIKE`, so a typed `%` or `_` is
-  treated as an ordinary character.
-- Results are capped at 50 per query.
+- Search runs in the browser. `/api/contacts` hands over all 251 rows in one response on
+  load, and every keystroke after that filters that array in memory — no request per
+  keystroke, and search keeps working if the connection drops once the page is up.
+- Search covers name and company only, is case-insensitive, and caps the query at 80
+  characters. Matching is plain substring work in JavaScript, so a typed `%` or `_` is an
+  ordinary character. Priority rows sort first, then prefix matches, then alphabetically by
+  company and name.
+- Results are not capped; a search can return all 251.

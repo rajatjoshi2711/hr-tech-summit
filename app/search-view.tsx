@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import type { Contact } from '@/lib/types';
-
-const DEBOUNCE_MS = 250;
+import { useEffect, useMemo, useState } from 'react';
+import { indexContacts, searchContacts, type IndexedContact } from '@/lib/search';
 
 function SearchIcon() {
   return (
@@ -44,9 +42,9 @@ function ChevronIcon() {
   );
 }
 
-type Status = 'idle' | 'loading' | 'error';
+type Status = 'loading' | 'ready' | 'error';
 
-type Failure = 'not_configured' | 'not_seeded' | 'search_failed';
+type Failure = 'not_configured' | 'not_seeded' | 'search_failed' | 'offline';
 
 const FAILURE_COPY: Record<Failure, { title: string; detail: string }> = {
   not_configured: {
@@ -58,12 +56,16 @@ const FAILURE_COPY: Record<Failure, { title: string; detail: string }> = {
     detail: 'Run npm run seed to load the 251 contacts.',
   },
   search_failed: {
-    title: 'Search is down right now.',
+    title: 'The contact list would not load.',
     detail: 'Try again in a moment.',
+  },
+  offline: {
+    title: 'Could not reach the contact list.',
+    detail: 'Check the connection and load it again.',
   },
 };
 
-class SearchFailed extends Error {
+class LoadFailed extends Error {
   constructor(readonly reason: Failure) {
     super(reason);
   }
@@ -71,67 +73,61 @@ class SearchFailed extends Error {
 
 export default function SearchView() {
   const [query, setQuery] = useState('');
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [index, setIndex] = useState<IndexedContact[]>([]);
   const [status, setStatus] = useState<Status>('loading');
   const [failure, setFailure] = useState<Failure>('search_failed');
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
-  // With no query the API returns a default slice of the list. That is a browse,
-  // not a result, so it stays folded away until someone asks for it.
+  // The whole list arrives in one request. Every search after that runs against
+  // this array, so typing costs no network and works with the connection gone.
+  useEffect(() => {
+    const controller = new AbortController();
+    setStatus('loading');
+
+    fetch('/api/contacts', { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const reason = (data as { error?: Failure }).error;
+          throw new LoadFailed(reason && reason in FAILURE_COPY ? reason : 'search_failed');
+        }
+        return data as { contacts: Parameters<typeof indexContacts>[0] };
+      })
+      .then((data) => {
+        setIndex(indexContacts(data.contacts));
+        setStatus('ready');
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setFailure(error instanceof LoadFailed ? error.reason : 'offline');
+        setIndex([]);
+        setStatus('error');
+      });
+
+    return () => controller.abort();
+  }, [attempt]);
+
+  // With no query this is the whole list. That is a browse, not a result, so it
+  // stays folded away until someone asks for it.
   const isBrowsing = query.trim() === '';
 
   useEffect(() => {
     if (isBrowsing) setIsBrowseOpen(false);
   }, [isBrowsing]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setStatus('loading');
+  const results = useMemo(() => searchContacts(index, query), [index, query]);
 
-      fetch(`/api/contacts?q=${encodeURIComponent(query)}`, { signal: controller.signal })
-        .then(async (response) => {
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) {
-            const reason = (data as { error?: Failure }).error;
-            throw new SearchFailed(reason && reason in FAILURE_COPY ? reason : 'search_failed');
-          }
-          return data as { contacts: Contact[] };
-        })
-        .then((data) => {
-          setContacts(data.contacts);
-          setStatus('idle');
-          setHasLoadedOnce(true);
-        })
-        .catch((error: unknown) => {
-          if (error instanceof DOMException && error.name === 'AbortError') return;
-          setFailure(error instanceof SearchFailed ? error.reason : 'search_failed');
-          setContacts([]);
-          setStatus('error');
-          setHasLoadedOnce(true);
-        });
-    }, query === '' ? 0 : DEBOUNCE_MS);
-
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  const isBusy = status === 'loading';
-  const peopleCount = `${contacts.length}${contacts.length === 50 ? '+' : ''} ${
-    contacts.length === 1 ? 'person' : 'people'
-  }`;
+  const peopleCount = `${results.length} ${results.length === 1 ? 'person' : 'people'}`;
 
   function renderResults() {
     return (
-      <ul className={`results${isBusy ? ' results--busy' : ''}`}>
-        {contacts.map((contact, index) => (
+      <ul className="results">
+        {results.map((contact, position) => (
           <li
             key={contact.id}
             className="card"
-            style={index < 4 ? { animationDelay: `${index * 60}ms` } : undefined}
+            style={position < 4 ? { animationDelay: `${position * 60}ms` } : undefined}
           >
             <div className="card__head">
               <h3 className="card__name">{contact.name}</h3>
@@ -169,6 +165,7 @@ export default function SearchView() {
             spellCheck={false}
             placeholder="Name or company"
             aria-label="Search by name or company"
+            disabled={status !== 'ready'}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -185,24 +182,27 @@ export default function SearchView() {
         </div>
       </div>
 
-      {!isBrowsing && (
-        <p className="count" aria-live="polite">
-          {status === 'error' ? '\u00a0' : peopleCount}
-        </p>
-      )}
+      {status === 'loading' && <p className="count">Loading the list…</p>}
 
       {status === 'error' && (
         <div className="notice">
           <p className="notice__title">{FAILURE_COPY[failure].title}</p>
           <p className="notice__detail">{FAILURE_COPY[failure].detail}</p>
+          <button type="button" className="notice__retry" onClick={() => setAttempt((n) => n + 1)}>
+            Try again
+          </button>
         </div>
       )}
 
-      {status !== 'error' && hasLoadedOnce && contacts.length === 0 && !isBrowsing && (
+      {status === 'ready' && !isBrowsing && (
+        <p className="count" aria-live="polite">{peopleCount}</p>
+      )}
+
+      {status === 'ready' && !isBrowsing && results.length === 0 && (
         <p className="notice">No one matches that. Try a company name.</p>
       )}
 
-      {isBrowsing && status !== 'error' ? (
+      {status === 'ready' && isBrowsing ? (
         <section className={`browse${isBrowseOpen ? ' browse--open' : ''}`}>
           <h2 className="browse__heading">
             <button
@@ -225,11 +225,11 @@ export default function SearchView() {
           {/* The names live inside the section, so opening it never spills them
               out into the page below. */}
           <div className="browse__panel" id="browse-panel" hidden={!isBrowseOpen}>
-            {renderResults()}
+            {isBrowseOpen && renderResults()}
           </div>
         </section>
       ) : (
-        renderResults()
+        status === 'ready' && renderResults()
       )}
     </>
   );

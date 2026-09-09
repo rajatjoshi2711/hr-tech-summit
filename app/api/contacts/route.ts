@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server';
-import { searchContacts, SearchError } from '@/lib/db';
+import { fetchAllContacts, SearchError } from '@/lib/db';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-  const q = new URL(request.url).searchParams.get('q') ?? '';
-
+/** Hands the client the full list in one response; searching happens there. */
+export async function GET() {
   try {
-    const contacts = await searchContacts(q);
+    const contacts = await fetchAllContacts();
     return NextResponse.json({ contacts });
   } catch (error) {
     const reason = error instanceof SearchError ? error.reason : 'search_failed';
-    console.error(`contact search failed (${reason})`, error);
+    console.error(`loading the contact list failed (${reason})`, error);
     return NextResponse.json({ error: reason }, { status: 500 });
   }
 }
