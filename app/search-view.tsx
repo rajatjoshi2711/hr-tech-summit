@@ -124,6 +124,36 @@ export default function SearchView() {
     contacts.length === 1 ? 'person' : 'people'
   }`;
 
+  function renderResults() {
+    return (
+      <ul className={`results${isBusy ? ' results--busy' : ''}`}>
+        {contacts.map((contact, index) => (
+          <li
+            key={contact.id}
+            className="card"
+            style={index < 4 ? { animationDelay: `${index * 60}ms` } : undefined}
+          >
+            <div className="card__head">
+              <h3 className="card__name">{contact.name}</h3>
+              {contact.is_priority && <span className="badge">Priority</span>}
+            </div>
+            <p className="card__company">{contact.company}</p>
+            <p className="card__role">{contact.designation}</p>
+            <div className="card__foot">
+              {contact.industry && <span className="tag">{contact.industry}</span>}
+            </div>
+            {contact.requirement && (
+              <p className="card__req">
+                <span className="card__req-icon" aria-hidden="true"><TargetIcon /></span>
+                <span><span className="card__req-label">Open for</span> {contact.requirement}</span>
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <>
       <div className="searchbar">
@@ -161,22 +191,6 @@ export default function SearchView() {
         </p>
       )}
 
-      {isBrowsing && status !== 'error' && (
-        <button
-          type="button"
-          className="disclosure"
-          aria-expanded={isBrowseOpen}
-          aria-controls="browse-panel"
-          onClick={() => setIsBrowseOpen((open) => !open)}
-        >
-          <span className={`disclosure__chevron${isBrowseOpen ? ' disclosure__chevron--open' : ''}`}>
-            <ChevronIcon />
-          </span>
-          <span className="disclosure__label">Browse without searching</span>
-          <span className="disclosure__count">{peopleCount}</span>
-        </button>
-      )}
-
       {status === 'error' && (
         <div className="notice">
           <p className="notice__title">{FAILURE_COPY[failure].title}</p>
@@ -188,35 +202,35 @@ export default function SearchView() {
         <p className="notice">No one matches that. Try a company name.</p>
       )}
 
-      <ul
-        id="browse-panel"
-        className={`results${isBusy ? ' results--busy' : ''}`}
-        hidden={isBrowsing && !isBrowseOpen}
-      >
-        {contacts.map((contact, index) => (
-          <li
-            key={contact.id}
-            className="card"
-            style={index < 4 ? { animationDelay: `${index * 60}ms` } : undefined}
-          >
-            <div className="card__head">
-              <h2 className="card__name">{contact.name}</h2>
-              {contact.is_priority && <span className="badge">Priority</span>}
-            </div>
-            <p className="card__company">{contact.company}</p>
-            <p className="card__role">{contact.designation}</p>
-            <div className="card__foot">
-              {contact.industry && <span className="tag">{contact.industry}</span>}
-            </div>
-            {contact.requirement && (
-              <p className="card__req">
-                <span className="card__req-icon" aria-hidden="true"><TargetIcon /></span>
-                <span><span className="card__req-label">Open for</span> {contact.requirement}</span>
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+      {isBrowsing && status !== 'error' ? (
+        <section className={`browse${isBrowseOpen ? ' browse--open' : ''}`}>
+          <h2 className="browse__heading">
+            <button
+              type="button"
+              className="browse__toggle"
+              aria-expanded={isBrowseOpen}
+              aria-controls="browse-panel"
+              onClick={() => setIsBrowseOpen((open) => !open)}
+            >
+              <span
+                className={`browse__chevron${isBrowseOpen ? ' browse__chevron--open' : ''}`}
+                aria-hidden="true"
+              >
+                <ChevronIcon />
+              </span>
+              <span className="browse__label">Browse without searching</span>
+              <span className="browse__count">{peopleCount}</span>
+            </button>
+          </h2>
+          {/* The names live inside the section, so opening it never spills them
+              out into the page below. */}
+          <div className="browse__panel" id="browse-panel" hidden={!isBrowseOpen}>
+            {renderResults()}
+          </div>
+        </section>
+      ) : (
+        renderResults()
+      )}
     </>
   );
 }

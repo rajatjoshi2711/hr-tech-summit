@@ -375,20 +375,32 @@ ul { list-style: none; padding: 0; }
   cursor: not-allowed;
 }
 
-/* ---- browse disclosure ---- */
+/* ---- browse section ---- */
 
-.disclosure {
+/* One bounded surface: the toggle is its header and the names sit inside it,
+   so opening the section never spills cards out into the page. */
+.browse {
+  margin-top: var(--space-2);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.browse--open { box-shadow: var(--shadow-sm); }
+
+.browse__heading { font: inherit; }
+
+.browse__toggle {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  margin: var(--space-2) 0 var(--space-3);
-  padding: 0 var(--space-3);
-  height: var(--control-h-md);
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
+  height: var(--control-h-lg);
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 0;
   color: var(--text-heading);
   font: var(--type-label);
   text-align: left;
@@ -396,22 +408,37 @@ ul { list-style: none; padding: 0; }
   transition: var(--transition-control);
 }
 
-.disclosure:hover { border-color: var(--border-default); background: var(--surface-sunken); }
-.disclosure:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.browse__toggle:hover { background: var(--surface-sunken); }
+.browse__toggle:focus-visible { outline: none; box-shadow: var(--ring-focus); }
 
-.disclosure__chevron {
+.browse__chevron {
   display: inline-flex;
   flex: none;
   color: var(--text-brand);
   transition: transform var(--duration-base) var(--ease-out);
 }
 
-.disclosure__chevron--open { transform: rotate(90deg); }
+.browse__chevron--open { transform: rotate(90deg); }
 
-.disclosure__label { flex: 1; min-width: 0; }
+.browse__label { flex: 1; min-width: 0; }
 
-.disclosure__count {
+.browse__count {
   flex: none;
   font: var(--type-mono);
   color: var(--text-muted);
+}
+
+.browse__panel {
+  max-height: 60svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-subtle);
+}
+
+/* Cards inside the section drop their own elevation - the section carries it. */
+.browse__panel .card {
+  box-shadow: none;
+  border-color: var(--border-default);
 }
