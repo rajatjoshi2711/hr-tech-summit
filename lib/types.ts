@@ -6,4 +6,5 @@ export type Contact = {
   industry: string | null;
   requirement: string | null;
   is_priority: boolean;
+  remarks: string | null;
 };

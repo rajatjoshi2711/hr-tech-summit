@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import ContactCard from './contact-card';
 import { indexContacts, searchContacts, type IndexedContact } from '@/lib/search';
 
 function SearchIcon() {
@@ -18,17 +19,6 @@ function ClearIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
       strokeLinecap="round" strokeLinejoin="round" width="20" height="20" aria-hidden="true">
       <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
-  );
-}
-
-function TargetIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
     </svg>
   );
 }
@@ -78,6 +68,9 @@ export default function SearchView() {
   const [failure, setFailure] = useState<Failure>('search_failed');
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // Remarks are kept beside the search index, so saving one note does not
+  // rebuild the folded fields the search reads.
+  const [remarks, setRemarks] = useState<Record<number, string | null>>({});
 
   // The whole list arrives in one request. Every search after that runs against
   // this array, so typing costs no network and works with the connection gone.
@@ -96,6 +89,9 @@ export default function SearchView() {
       })
       .then((data) => {
         setIndex(indexContacts(data.contacts));
+        setRemarks(
+          Object.fromEntries(data.contacts.map((contact) => [contact.id, contact.remarks])),
+        );
         setStatus('ready');
       })
       .catch((error: unknown) => {
@@ -118,33 +114,23 @@ export default function SearchView() {
 
   const results = useMemo(() => searchContacts(index, query), [index, query]);
 
+  const onRemarksSaved = useCallback((contactId: number, saved: string | null) => {
+    setRemarks((current) => ({ ...current, [contactId]: saved }));
+  }, []);
+
   const peopleCount = `${results.length} ${results.length === 1 ? 'person' : 'people'}`;
 
   function renderResults() {
     return (
       <ul className="results">
         {results.map((contact, position) => (
-          <li
+          <ContactCard
             key={contact.id}
-            className="card"
-            style={position < 4 ? { animationDelay: `${position * 60}ms` } : undefined}
-          >
-            <div className="card__head">
-              <h3 className="card__name">{contact.name}</h3>
-              {contact.is_priority && <span className="badge">Priority</span>}
-            </div>
-            <p className="card__company">{contact.company}</p>
-            <p className="card__role">{contact.designation}</p>
-            <div className="card__foot">
-              {contact.industry && <span className="tag">{contact.industry}</span>}
-            </div>
-            {contact.requirement && (
-              <p className="card__req">
-                <span className="card__req-icon" aria-hidden="true"><TargetIcon /></span>
-                <span><span className="card__req-label">Open for</span> {contact.requirement}</span>
-              </p>
-            )}
-          </li>
+            contact={contact}
+            remarks={remarks[contact.id] ?? null}
+            onSaved={onRemarksSaved}
+            animationDelay={position < 4 ? `${position * 60}ms` : undefined}
+          />
         ))}
       </ul>
     );

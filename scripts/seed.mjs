@@ -99,6 +99,15 @@ async function main() {
       is_priority boolean not null default false
     )
   `;
+  // Discussion remarks are deliberately a separate table: this seed truncates
+  // contacts, and notes taken at the summit must survive a re-seed.
+  await sql`
+    create table if not exists contact_remarks (
+      contact_id integer primary key,
+      remarks text not null,
+      updated_at timestamptz not null default now()
+    )
+  `;
   await sql`create index if not exists contacts_name_idx on contacts (lower(name))`;
   await sql`create index if not exists contacts_company_idx on contacts (lower(company))`;
   await sql`truncate table contacts restart identity`;

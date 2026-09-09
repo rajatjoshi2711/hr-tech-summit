@@ -37,6 +37,14 @@ spreadsheet no longer matches.
 Re-seeding is idempotent — it truncates and reloads. Update the spreadsheet, re-run the seed,
 and the live app picks it up without a redeploy.
 
+## Discussion remarks
+
+Every contact card has a text box for notes from the conversation. Saving writes to a
+`contact_remarks` table keyed by contact id, and clearing the box deletes the row. Remarks
+are deliberately not a column on `contacts`: the seed truncates that table, and notes taken
+at the summit have to survive a re-seed. Notes are shared, not per person - anyone with the
+PIN sees and can edit them.
+
 ## Notes
 
 - The app sits behind a 6-digit PIN. The default is `111111`; set `ACCESS_PIN` on the Vercel
@@ -53,3 +61,5 @@ and the live app picks it up without a redeploy.
   ordinary character. Priority rows sort first, then prefix matches, then alphabetically by
   company and name.
 - Results are not capped; a search can return all 251.
+- Remarks are capped at 2000 characters and saved one contact at a time over
+  `PUT /api/contacts/:id/remarks`, which sits behind the same PIN as everything else.
